@@ -3,10 +3,93 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="tailwind.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css" />
-
-    <title>Document</title>
+    <title>Quiz Game</title>
   </head>
-  <body></body>
+
+  <body
+    class="h-screen flex items-center justify-center  font-sans text-gray-900"
+  >
+    <div
+      class="quiz-container bg-white p-6 rounded-xl shadow-lg w-full max-w-2xl mx-auto"
+    >
+      <div id="Quiz-box">
+        <h1 class="text-3xl font-bold mb-4 flex justify-center">Question 1</h1>
+        <p class="mb-4 flex justify-center font-bold text-lg">What is the capital of India?</p>
+        <div class="timer mb-4 flex justify-center font-bold">
+          Time Left:<span id="time-left" class="text-red-500 font-bold">10</span
+          >s
+        </div>
+
+        <div class="space-y-2">
+          <button class="choice w-full py-3 border rounded hover:bg-gray-100">
+            Choice 1
+          </button>
+          <button class="choice w-full py-3 border rounded hover:bg-gray-100">
+            Choice 2
+          </button>
+          <button class="choice w-full py-3 border rounded hover:bg-gray-100">
+            Choice 3
+          </button>
+          <button class="choice w-full py-3 border rounded hover:bg-gray-100">
+            Choice 4
+          </button>
+        </div>
+
+        <div class="mt-6 flex justify-between items-center">
+          <button
+            id="previous-btn"
+            class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+          >
+            <- Prev
+          </button>
+
+          <button
+            id="next-btn"
+            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Next ->
+          </button>
+        </div>
+      </div>
+      <!-- Loader -->
+      <div id="loader" class="flex flex-col items-center hidden">
+        <h2 class="text-2xl font-bold ">Loading...</h2>
+      </div>
+      <!-- High Score modal -->
+      <div id="high-score-modal" class="hidden">
+        <table id="table-high-score" class="w-full text-center border-separate border-spacing-0 border shadow-lg rounded-lg overflow-hidden">
+             <thead>
+               <tr>
+                 <th>Name</th>
+                 <th>Score</th>
+                 <th>Date</th>
+               </tr>
+             </thead>  
+             <tbody id = "table-body-high-score">
+                 <tr class="highlight">
+                    <td>Pranay</td>
+                    <td>8</td>
+                    <td>2025-01-20</td>
+                 </tr>
+                 <tr>
+                    <td>Pranay</td>
+                    <td>8</td>
+                    <td>2025-01-20</td>
+                 </tr>
+                 <tr>
+                    <td>Pranay</td>
+                    <td>8</td>
+                    <td>2025-01-20</td>
+                 </tr>
+             </tbody>
+        </table>
+        <div class="flex justify-center items-center">
+        <button type = "button" id="play-again-btn" class = " bg-blue-500 text-white px-4 py-2 mt-4 rounded hover:bg-blue-600">Play Again</button>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
 </html>
