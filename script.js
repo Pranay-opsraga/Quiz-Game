@@ -19,6 +19,10 @@ const playAgainBtn = document.getElementById("play-again-btn");
 let currentQuestion = 0;
 let score = 0;
 let Questions = [];
+let totalScore = 0;
+const TOTAL_TIME = 60000; // 1 minute in ms
+let timeLeft = TOTAL_TIME;
+let timerInterval = null;
 
 //Fetch Questions from API
 async function fetchQuestions() {
@@ -65,21 +69,64 @@ const loadQuestions = () => {
 
   const previousAnswer = userAnswers[currentQuestion];
 
-if (previousAnswer) {
-  const choices = document.querySelectorAll(".choice");
+  if (previousAnswer) {
+    const choices = document.querySelectorAll(".choice");
 
-  choices.forEach(choice => {
-    // remove hover override
-    choice.classList.remove("hover:bg-gray-100");
-    if (choice.innerHTML.trim() === question.correct_answer.trim()) {
-      choice.classList.add("correct");
-    } 
-    
-    choice.disabled = true;
-  });
+    choices.forEach(choice => {
+      // remove hover override
+      choice.classList.remove("hover:bg-gray-100");
+      if (choice.innerHTML.trim() === question.correct_answer.trim()) {
+        choice.classList.add("correct");
+      }
+
+      choice.disabled = true;
+    });
+  }
+
+  if (currentQuestion === 0) {
+    startTimer();
+  }
+};
+
+function endQuiz() {
+  alert("⏰ Time's up!");
+  
+  // disable everything
+  document.querySelectorAll(".choice").forEach(btn => btn.disabled = true);
+  nextButton.disabled = true;
+  prevButton.disabled = true;
+
+  // you can show score / modal here
+  // showResult();
 }
 
-};
+
+function startTimer() {
+  if (timerInterval) return; // prevent multiple timers
+
+  const startTime = Date.now();
+
+  timerInterval = setInterval(() => {
+    const elapsed = Date.now() - startTime;
+    timeLeft = TOTAL_TIME - elapsed;
+
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timeLeft = 0;
+      updateTimerDisplay(0);
+      endQuiz();
+      return;
+    }
+
+    updateTimerDisplay(timeLeft);
+  }, 100);
+}
+
+function updateTimerDisplay(ms) {
+  const seconds = (ms / 1000).toFixed(2);
+  timerDisplay.innerText = `${seconds}`;
+}
 
 // Check Answer logic
 
@@ -97,9 +144,9 @@ const checkAnswer = (selectedAnswer, correctAnswer) => {
     } else {
       choice.classList.add("wrong");
     }
-     choice.disabled = true;
+    choice.disabled = true;
   });
-  
+
 };
 
 // Next Button logic
