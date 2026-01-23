@@ -126,6 +126,7 @@ function startTimer() {
       clearInterval(timerInterval);
       timerInterval = null;
       timeLeft = 0;
+      submitBtn.classList.remove("hidden");
       updateTimerDisplay(0);
       endQuiz();
       return;
