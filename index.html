@@ -13,13 +13,13 @@
   >
    <div class="flex flex-col items-center">
     <div class="timer-container bg-white rounded-lg mb-4 flex justify-center items-center font-bold px-4 py-2">
-          Time Left:<span id="time-left" class="text-red-500 font-bold">10</span
+          Time Left:<span id="time-left" class="text-red-500 font-bold"></span
           >s
         </div>
     <div
       class="quiz-container bg-white p-6 rounded-xl shadow-lg w-full max-w-2xl mx-auto"
     >
-      <div id="Quiz-box">
+      <div id="quiz-box">
         <h1 class="text-3xl font-bold mb-4 flex justify-center" id="question-number"></h1>
         <p class="mb-4 flex justify-center items-center text-lg" id="question-text">Loading Questions...</p>
 
@@ -45,6 +45,10 @@
           >
             <- Prev
           </button>
+ 
+           <button id = "submit-btn" class="bg-blue-500 text-white px-4 py-2 rounded font-bold hover:bg-blue-600 hidden">
+               Submit
+          </button>
 
           <button
             id="next-btn"
@@ -59,7 +63,7 @@
         <h2 class="text-2xl font-bold ">Loading...</h2>
       </div>
       <!-- High Score modal -->
-      <div id="high-score-modal" class="hidden">
+      <div id="high-score-modal" class="flex flex-col hidden ">
         <table id="table-high-score" class="w-full text-center border-separate border-spacing-0 border shadow-lg rounded-lg overflow-hidden">
              <thead>
                <tr>

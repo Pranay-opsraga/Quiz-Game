@@ -4,6 +4,7 @@ const TRIVIA_API_URL =
   "https://opentdb.com/api.php?amount=10&category=18&difficulty=medium&type=multiple";
 const PANTRY_API_URL = "https://pantry-proxy-api-two.vercel.app/test";
 
+const quizContainer = document.querySelector(".quiz-container");
 const quizBox = document.getElementById("quiz-box");
 const questionNumber = document.getElementById("question-number");
 const questionText = document.getElementById("question-text");
@@ -12,17 +13,18 @@ const choiceContainer = document.getElementById("choice-container");
 const nextButton = document.getElementById("next-btn");
 const prevButton = document.getElementById("previous-btn");
 const loader = document.getElementById("loader");
-const highScoreList = document.getElementById("high-score-modal");
-const listhighScore = document.getElementById("list-high-score");
+const highScoremodal = document.getElementById("high-score-modal");
+const highScoreslist = document.getElementById("list-high-score");
 const playAgainBtn = document.getElementById("play-again-btn");
+const submitBtn = document.getElementById("submit-btn");
 
+let highScores = [];
 let currentQuestion = 0;
-let score = 0;
 let Questions = [];
-let totalScore = 0;
 const TOTAL_TIME = 60000; // 1 minute in ms
 let timeLeft = TOTAL_TIME;
 let timerInterval = null;
+let baseTimeLeft = TOTAL_TIME;
 
 //Fetch Questions from API
 async function fetchQuestions() {
@@ -42,7 +44,6 @@ async function fetchQuestions() {
 // Load each question to UI
 
 const loadQuestions = () => {
-
   const question = Questions[currentQuestion];
   questionText.innerHTML = question.question;
   questionNumber.innerText = `Question ${currentQuestion + 1}`;
@@ -72,7 +73,7 @@ const loadQuestions = () => {
   if (previousAnswer) {
     const choices = document.querySelectorAll(".choice");
 
-    choices.forEach(choice => {
+    choices.forEach((choice) => {
       // remove hover override
       choice.classList.remove("hover:bg-gray-100");
       if (choice.innerHTML.trim() === question.correct_answer.trim()) {
@@ -86,13 +87,17 @@ const loadQuestions = () => {
   if (currentQuestion === 0) {
     startTimer();
   }
+
+  if (currentQuestion === 9) {
+    submitBtn.classList.remove("hidden");
+  }
 };
 
 function endQuiz() {
   alert("⏰ Time's up!");
-  
+
   // disable everything
-  document.querySelectorAll(".choice").forEach(btn => btn.disabled = true);
+  document.querySelectorAll(".choice").forEach((btn) => (btn.disabled = true));
   nextButton.disabled = true;
   prevButton.disabled = true;
 
@@ -100,17 +105,24 @@ function endQuiz() {
   // showResult();
 }
 
+function pauseTimer() {
+  if (!timerInterval) return;
+
+  clearInterval(timerInterval);
+  timerInterval = null;
+}
 
 function startTimer() {
-  if (timerInterval) return; // prevent multiple timers
+  if (timerInterval) return;
 
   const startTime = Date.now();
+  const baseTimeLeft = timeLeft; // 🔑 snapshot ONCE
 
   timerInterval = setInterval(() => {
     const elapsed = Date.now() - startTime;
-    timeLeft = TOTAL_TIME - elapsed;
+    const remaining = baseTimeLeft - elapsed;
 
-    if (timeLeft <= 0) {
+    if (remaining <= 0) {
       clearInterval(timerInterval);
       timerInterval = null;
       timeLeft = 0;
@@ -119,6 +131,7 @@ function startTimer() {
       return;
     }
 
+    timeLeft = remaining; // ✅ safe now
     updateTimerDisplay(timeLeft);
   }, 100);
 }
@@ -146,7 +159,6 @@ const checkAnswer = (selectedAnswer, correctAnswer) => {
     }
     choice.disabled = true;
   });
-
 };
 
 // Next Button logic
@@ -161,6 +173,117 @@ nextButton.addEventListener("click", () => {
 prevButton.addEventListener("click", () => {
   currentQuestion--;
   loadQuestions();
+});
+
+const loadingFunc = () => {
+  quizBox.classList.add("hidden");
+  loader.classList.remove("hidden");
+  loader.offsetHeight;
+};
+
+// End game when all the questions are finished
+
+const CalcScore = () => {
+  let Score = 0;
+
+  Questions.forEach((question, index) => {
+    if (userAnswers[index] === question.correct_answer.trim()) {
+      Score += 100;
+    }
+  });
+
+  const TimeBonus = Math.floor(timeLeft / 1000);
+  Score += TimeBonus;
+  return Score;
+};
+
+const endGame = () => {
+  loader.classList.add("hidden"); // hide loader
+  saveHighScore();
+};
+
+const saveHighScore = async () => {
+  const total_score = CalcScore();
+  let name = prompt("Enter your name for score board");
+  name = name?.trim() || "Anonymous";
+  const date = new Date().toLocaleDateString();
+  const newScore = { name, score: total_score, date };
+  console.log(newScore);
+
+  try {
+    const response = await fetch(PANTRY_API_URL);
+    if (response.ok) {
+      const data = await response.json();
+      highScores = data.highScores || [];
+    }
+  } catch (error) {
+    console.log("Basket not found ,creating a new one");
+    highScores = [];
+  }
+  highScores.push(newScore);
+
+  // Sort high scores and keep only top 10
+  highScores.sort((a, b) => b.score - a.score);
+  highScores = highScores.slice(0, 10);
+
+  try {
+    await fetch(PANTRY_API_URL, {
+      method: "POST",
+      headers: { "Content-type": "application/json" },
+      body: JSON.stringify({ highScores }),
+    });
+  } catch (error) {
+    console.error("Error saving high score:", error);
+  }
+
+  displayHighScore(newScore);
+};
+
+// Display high Score
+
+const displayHighScore = (newScore) => {
+  highScoreslist.innerHTML = "";
+
+  highScores.forEach((score) => {
+    const newrow = document.createElement("tr");
+    const nameCell = document.createElement("td");
+    nameCell.innerText = score.name;
+
+    const scoreCell = document.createElement("td");
+    scoreCell.innerText = score.score;
+
+    const dateCell = document.createElement("td");
+    dateCell.innerText = score.date;
+
+    newrow.appendChild(nameCell);
+    newrow.appendChild(scoreCell);
+    newrow.appendChild(dateCell);
+
+    if (
+      score.name === newScore.name &&
+      score.score === newScore.score &&
+      score.date === newScore.date
+    ) {
+      newrow.classList.add("highlight");
+    }
+
+    highScoreslist.appendChild(newrow);
+  });
+
+  highScoremodal.style.display = "flex";
+};
+// Submit button logic
+
+submitBtn.addEventListener("click", () => {
+  pauseTimer(); //  STOP TIME
+  loadingFunc();
+  setTimeout(() => {
+    endGame();
+  }, 2000);
+});
+
+playAgainBtn.addEventListener("click", () => {
+  window.location.reload();
 });
 
 fetchQuestions();
